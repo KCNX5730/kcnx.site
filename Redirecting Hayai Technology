@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>All-in-One AI, Search, and Social</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: url('background.jpg') no-repeat center center fixed;
+      background-size: cover;
+      color: white;
+    }
+    h1, h2 {
+      text-align: center;
+      margin-top: 20px;
+    }
+    .section {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      padding: 20px;
+    }
+    .card {
+      background: rgba(0, 0, 0, 0.6);
+      margin: 10px;
+      padding: 15px;
+      border-radius: 15px;
+      width: 120px;
+      text-align: center;
+      transition: transform 0.3s;
+    }
+    .card:hover {
+      transform: scale(1.05);
+      background: rgba(255, 255, 255, 0.1);
+    }
+    .card img {
+      width: 60px;
+      height: 60px;
+    }
+    a {
+      text-decoration: none;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Welcome to Your Smart Dashboard</h1>
+
+  <h2>🧠 AI Tools</h2>
+  <div class="section">
+    <a href="https://chat.openai.com/" target="_blank" class="card">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/0/04/ChatGPT_logo.svg" alt="ChatGPT">
+      <div>ChatGPT</div>
+    </a>
+    <a href="https://gemini.google.com/" target="_blank" class="card">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Google_Gemini_logo.svg/1200px-Google_Gemini_logo.svg.png" alt="Gemini">
+      <div>Gemini</div>
+    </a>
+    <a href="https://perplexity.ai/" target="_blank" class="card">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/Perplexity_logo.svg/1024px-Perplexity_logo.svg.png" alt="Perplexity AI">
+      <div>Perplexity</div>
+    </a>
+    <a href="https://www.you.com/" target="_blank" class="card">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/You.com_logo_2021.svg/1280px-You.com_logo_2021.svg.png" alt="You.com">
+      <div>You.com AI</div>
+    </a>
+    <a href="https://www.phind.com/" target="_blank" class="card">
+      <img src="https://phind.com/static/favicon.png" alt="Phind AI">
+      <div>Phind</div>
+    </a>
+  </div>
+
+  <h2>🔍 Search Engines</h2>
+  <div class="section">
+    <a href="https://www.google.com/" target="_blank" class="card"><img src="https://www.google.com/favicon.ico"><div>Google</div></a>
+    <a href="https://www.bing.com/" target="_blank" class="card"><img src="https://www.bing.com/sa/simg/favicon-2x.ico"><div>Bing</div></a>
+    <a href="https://duckduckgo.com/" target="_blank" class="card"><img src="https://duckduckgo.com/favicon.ico"><div>DuckDuckGo</div></a>
+    <a href="https://search.brave.com/" target="_blank" class="card"><img src="https://search.brave.com/favicon.ico"><div>Brave</div></a>
+    <a href="https://www.yandex.com/" target="_blank" class="card"><img src="https://yandex.com/favicon.ico"><div>Yandex</div></a>
+    <a href="https://www.ecosia.org/" target="_blank" class="card"><img src="https://www.ecosia.org/favicon.ico"><div>Ecosia</div></a>
+    <a href="https://www.qwant.com/" target="_blank" class="card"><img src="https://www.qwant.com/favicon.ico"><div>Qwant</div></a>
+    <a href="https://www.startpage.com/" target="_blank" class="card"><img src="https://www.startpage.com/favicon.ico"><div>Startpage</div></a>
+    <a href="https://neeva.com/" target="_blank" class="card"><img src="https://neeva.com/favicon.ico"><div>Neeva</div></a>
+    <a href="https://search.aol.com/" target="_blank" class="card"><img src="https://www.aol.com/favicon.ico"><div>AOL</div></a>
+  </div>
+
+  <h2>📱 Social Media Apps</h2>
+  <div class="section">
+    <a href="https://www.facebook.com/" target="_blank" class="card"><img src="https://www.facebook.com/favicon.ico"><div>Facebook</div></a>
+    <a href="https://www.instagram.com/" target="_blank" class="card"><img src="https://www.instagram.com/favicon.ico"><div>Instagram</div></a>
+    <a href="https://www.twitter.com/" target="_blank" class="card"><img src="https://twitter.com/favicon.ico"><div>Twitter</div></a>
+    <a href="https://www.tiktok.com/" target="_blank" class="card"><img src="https://www.tiktok.com/favicon.ico"><div>TikTok</div></a>
+    <a href="https://www.linkedin.com/" target="_blank" class="card"><img src="https://www.linkedin.com/favicon.ico"><div>LinkedIn</div></a>
+    <a href="https://www.snapchat.com/" target="_blank" class="card"><img src="https://www.snapchat.com/favicon.ico"><div>Snapchat</div></a>
+    <a href="https://www.reddit.com/" target="_blank" class="card"><img src="https://www.reddit.com/favicon.ico"><div>Reddit</div></a>
+    <a href="https://www.pinterest.com/" target="_blank" class="card"><img src="https://www.pinterest.com/favicon.ico"><div>Pinterest</div></a>
+    <a href="https://discord.com/" target="_blank" class="card"><img src="https://discord.com/favicon.ico"><div>Discord</div></a>
+    <a href="https://www.threads.net/" target="_blank" class="card"><img src="https://www.threads.net/favicon.ico"><div>Threads</div></a>
+  </div>
+
+</body>
+</html>
