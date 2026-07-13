@@ -1,4 +1,4 @@
-  <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -253,32 +253,46 @@
     #lockScreen .overlay.visible {
       opacity: 1;
     }
+    /* ── TIME & DATE – BOTTOM LEFT, SMALLER ── */
     #lockScreen .time-display {
+      position: absolute;
+      bottom: 3.5vh;
+      left: 4vw;
       font-family: 'Consolas', 'Courier New', monospace;
-      font-weight: 700;
-      font-size: clamp(3rem, 10vw, 9rem);
-      letter-spacing: 0.06em;
-      background: linear-gradient(135deg, #f0f0f0 20%, #888 55%, #ddd 85%);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-      text-shadow: 0 0 60px rgba(255, 255, 255, 0.04);
+      font-weight: 600;
+      font-size: clamp(1.2rem, 3.2vw, 2.8rem);
+      letter-spacing: 0.04em;
+      color: rgba(255, 255, 255, 0.85);
+      text-shadow: 0 0 20px rgba(0,0,0,0.7);
       line-height: 1.1;
-      text-align: center;
+      text-align: left;
       pointer-events: none;
+      z-index: 12;
+      background: rgba(0,0,0,0.25);
+      padding: 0.2vh 1.2vw 0.4vh 1.2vw;
+      border-radius: 4px;
+      backdrop-filter: blur(2px);
+      -webkit-backdrop-filter: blur(2px);
+      border: 1px solid rgba(255,255,255,0.06);
     }
     #lockScreen .date-display {
+      position: absolute;
+      bottom: 1.2vh;
+      left: 4vw;
       font-family: 'Consolas', 'Courier New', monospace;
-      font-size: clamp(0.8rem, 2.2vw, 2.4rem);
-      letter-spacing: 0.12em;
-      background: linear-gradient(135deg, #e8e8e8 20%, #777 55%, #ccc 85%);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-      margin-top: 0.2vh;
-      text-transform: uppercase;
+      font-size: clamp(0.6rem, 1.4vw, 1.2rem);
+      letter-spacing: 0.08em;
+      color: rgba(220, 220, 220, 0.7);
+      text-shadow: 0 0 12px rgba(0,0,0,0.6);
       pointer-events: none;
-      font-weight: 400;
+      z-index: 12;
+      background: rgba(0,0,0,0.15);
+      padding: 0.1vh 1vw 0.2vh 1vw;
+      border-radius: 3px;
+      backdrop-filter: blur(1px);
+      -webkit-backdrop-filter: blur(1px);
+      border: 1px solid rgba(255,255,255,0.04);
+      text-transform: uppercase;
     }
     /* swipe catcher */
     #swipeCatcher {
@@ -369,10 +383,10 @@
              src="https://res.cloudinary.com/ccmt3psw/video/upload/v1783926098/KCNX_LOCKSCREEN_i3_yee8es.mp4">
       </video>
     </div>
-    <div class="overlay" id="lockOverlay">
-      <div class="time-display" id="lockTime">--:--</div>
-      <div class="date-display" id="lockDate">---</div>
-    </div>
+    <div class="overlay" id="lockOverlay"></div>
+    <!-- TIME & DATE – BOTTOM LEFT, SMALLER (positioned via CSS) -->
+    <div class="time-display" id="lockTime">--:--</div>
+    <div class="date-display" id="lockDate">---</div>
     <div id="swipeCatcher"></div>
   </div>
 
@@ -430,10 +444,8 @@
     backBtn.addEventListener('click', function(e) {
       e.stopPropagation();
       if (currentScreen === 'booting' || currentScreen === 'welcome') {
-        // go to lock
         showScreen('lock');
         startClock();
-        // show overlay after 2s if not already
         showLockOverlay();
       }
     });
@@ -491,18 +503,14 @@
     // ─── welcome screen ───
     function showWelcome() {
       showScreen('welcome');
-      // ensure video plays once (no loop)
       welcomeVideo.removeAttribute('loop');
       welcomeVideo.currentTime = 0;
       welcomeVideo.play().catch(() => {});
-      // transition to lock when video ends
       welcomeVideo.addEventListener('ended', function onEnd() {
         welcomeVideo.removeEventListener('ended', onEnd);
         goToLock();
       }, { once: true });
-      // fallback if video doesn't end
       setTimeout(() => {
-        // if we are still on welcome, force lock
         if (currentScreen === 'welcome') {
           goToLock();
         }
@@ -510,11 +518,9 @@
     }
 
     function goToLock() {
-      // pause welcome video
       welcomeVideo.pause();
       showScreen('lock');
       startClock();
-      // show overlay after 2 seconds
       showLockOverlay();
       initSwipe();
     }
@@ -522,7 +528,6 @@
     // ─── lock overlay ───
     function showLockOverlay() {
       if (lockOverlayTimer) clearTimeout(lockOverlayTimer);
-      // ensure overlay is hidden initially
       lockOverlay.classList.remove('visible');
       lockOverlayTimer = setTimeout(() => {
         lockOverlay.classList.add('visible');
@@ -619,7 +624,6 @@
         startClock();
         showLockOverlay();
         initSwipe();
-        // preload videos
         welcomeVideo.load();
         lockVideo.load();
       } else {
@@ -638,7 +642,6 @@
       if (lockOverlayTimer) clearTimeout(lockOverlayTimer);
     });
 
-    // ─── visibility change: keep clock ticking ───
     document.addEventListener('visibilitychange', () => {
       if (!document.hidden && currentScreen === 'lock') {
         updateClock();
