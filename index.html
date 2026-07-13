@@ -1,104 +1,651 @@
-<!DOCTYPE html>
+  <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>All-in-One AI, Search, and Social</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>KCNX Web Operating System</title>
   <style>
-    body {
+    /* ── reset & base ── */
+    *,
+    *::before,
+    *::after {
       margin: 0;
-      font-family: Arial, sans-serif;
-      background: url('background.jpg') no-repeat center center fixed;
-      background-size: cover;
-      color: white;
+      padding: 0;
+      box-sizing: border-box;
     }
-    h1, h2 {
-      text-align: center;
-      margin-top: 20px;
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #000;
+      font-family: 'Consolas', 'Courier New', monospace;
+      color: #fff;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: none;
     }
-    .section {
+    #os-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      width: 100dvw;
+      height: 100dvh;
+      background: #000;
+      overflow: hidden;
       display: flex;
-      flex-wrap: wrap;
+      align-items: center;
       justify-content: center;
-      padding: 20px;
     }
-    .card {
-      background: rgba(0, 0, 0, 0.6);
-      margin: 10px;
-      padding: 15px;
-      border-radius: 15px;
-      width: 120px;
-      text-align: center;
-      transition: transform 0.3s;
+    .screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: none;
+      flex-direction: column;
+      background: #000;
+      overflow: hidden;
     }
-    .card:hover {
-      transform: scale(1.05);
-      background: rgba(255, 255, 255, 0.1);
+    .screen.active {
+      display: flex;
     }
-    .card img {
-      width: 60px;
-      height: 60px;
-    }
-    a {
+
+    /* ── back button ── */
+    #backBtn {
+      position: fixed;
+      top: 18px;
+      left: 20px;
+      z-index: 9999;
+      font-size: 2.2rem;
+      color: #aaa;
+      cursor: pointer;
+      font-family: 'Consolas', 'Courier New', monospace;
+      transition: color 0.2s, transform 0.15s;
+      display: none;
       text-decoration: none;
-      color: white;
+      background: rgba(0, 0, 0, 0.55);
+      padding: 4px 14px 6px 10px;
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      line-height: 1;
+      touch-action: manipulation;
+    }
+    #backBtn:hover {
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+    #backBtn:active {
+      transform: scale(0.92);
+    }
+    #backBtn.show {
+      display: block;
+    }
+
+    /* ───────────── BOOT MANAGER ───────────── */
+    #bootManager {
+      justify-content: flex-start;
+      padding: 2.5vh 3vw;
+      background: #000;
+      font-size: clamp(14px, 1.4vw, 28px);
+      line-height: 1.7;
+    }
+    #bootManager .top-label {
+      font-size: clamp(12px, 1.1vw, 22px);
+      color: #aaa;
+      margin-bottom: 2.2vh;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid #222;
+      padding-bottom: 0.8vh;
+    }
+    #bootManager .boot-text {
+      white-space: pre-wrap;
+      font-size: clamp(13px, 1.3vw, 26px);
+      line-height: 1.75;
+      max-width: 100%;
+    }
+    #bootManager .boot-text .highlight {
+      color: #8af;
+    }
+    #bootManager .input-line {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 2.2vh;
+      font-size: clamp(14px, 1.4vw, 28px);
+    }
+    #bootManager .input-line input {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #fff;
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: clamp(14px, 1.4vw, 28px);
+      width: 3.2em;
+      caret-color: #fff;
+      padding: 0;
+      margin: 0;
+    }
+    #bootManager .cursor-blink {
+      display: inline-block;
+      width: 0.65em;
+      height: 1.1em;
+      background: #fff;
+      animation: blink 1s step-end infinite;
+      vertical-align: bottom;
+      margin-left: 2px;
+    }
+    @keyframes blink {
+      0%,
+      100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0;
+      }
+    }
+    #bootManager .cancel-msg {
+      color: #f66;
+      margin-top: 1.2vh;
+      font-size: clamp(13px, 1.2vw, 24px);
+      min-height: 2.4vh;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    #bootManager .cancel-msg.show {
+      opacity: 1;
+    }
+
+    /* ───────────── BOOTING SCREEN ───────────── */
+    #bootingScreen {
+      justify-content: center;
+      align-items: center;
+      background: #000;
+      gap: 4vh;
+    }
+    #bootingScreen .loader-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2.8vh;
+    }
+    #bootingScreen .spinner {
+      width: clamp(60px, 7vw, 120px);
+      height: clamp(60px, 7vw, 120px);
+      border: 4px solid transparent;
+      border-top: 4px solid #fff;
+      border-right: 4px solid #fff;
+      border-radius: 50%;
+      animation: spin 0.9s linear infinite;
+    }
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+    #bootingScreen .boot-status {
+      font-size: clamp(16px, 1.8vw, 36px);
+      color: #ddd;
+      letter-spacing: 1px;
+      text-align: center;
+      min-height: 3.6vh;
+    }
+
+    /* ───────────── WELCOME SCREEN ───────────── */
+    #welcomeScreen {
+      background: #000;
+      justify-content: center;
+      align-items: center;
+    }
+    #welcomeScreen video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      pointer-events: none;
+    }
+
+    /* ───────────── LOCK SCREEN ───────────── */
+    #lockScreen {
+      background: #000;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+    #lockScreen .video-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    #lockScreen .video-bg video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      pointer-events: none;
+    }
+    #lockScreen .overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      pointer-events: none;
+      z-index: 10;
+      background: rgba(0, 0, 0, 0.2);
+      opacity: 0;
+      transition: opacity 1s ease;
+    }
+    #lockScreen .overlay.visible {
+      opacity: 1;
+    }
+    #lockScreen .time-display {
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-weight: 700;
+      font-size: clamp(3rem, 10vw, 9rem);
+      letter-spacing: 0.06em;
+      background: linear-gradient(135deg, #f0f0f0 20%, #888 55%, #ddd 85%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: 0 0 60px rgba(255, 255, 255, 0.04);
+      line-height: 1.1;
+      text-align: center;
+      pointer-events: none;
+    }
+    #lockScreen .date-display {
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: clamp(0.8rem, 2.2vw, 2.4rem);
+      letter-spacing: 0.12em;
+      background: linear-gradient(135deg, #e8e8e8 20%, #777 55%, #ccc 85%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      margin-top: 0.2vh;
+      text-transform: uppercase;
+      pointer-events: none;
+      font-weight: 400;
+    }
+    /* swipe catcher */
+    #swipeCatcher {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 20;
+      touch-action: none;
+      pointer-events: auto;
+    }
+
+    /* ── responsive tweaks ── */
+    @media (max-aspect-ratio: 16/9) {
+      #lockScreen .video-bg video {
+        height: 177.78vh;
+        width: 177.78vh;
+        margin-left: -38.89vh;
+      }
+    }
+    @media (min-aspect-ratio: 16/9) {
+      #lockScreen .video-bg video {
+        width: 100%;
+        height: 100%;
+      }
+    }
+
+    ::-webkit-scrollbar {
+      display: none;
+    }
+    input {
+      caret-color: #fff;
     }
   </style>
 </head>
 <body>
 
-  <h1>Welcome to Your Smart Dashboard</h1>
+<div id="os-container">
 
-  <h2>🧠 AI Tools</h2>
-  <div class="section">
-    <a href="https://chat.openai.com/" target="_blank" class="card">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/0/04/ChatGPT_logo.svg" alt="ChatGPT">
-      <div>ChatGPT</div>
-    </a>
-    <a href="https://gemini.google.com/" target="_blank" class="card">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Google_Gemini_logo.svg/1200px-Google_Gemini_logo.svg.png" alt="Gemini">
-      <div>Gemini</div>
-    </a>
-    <a href="https://perplexity.ai/" target="_blank" class="card">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/Perplexity_logo.svg/1024px-Perplexity_logo.svg.png" alt="Perplexity AI">
-      <div>Perplexity</div>
-    </a>
-    <a href="https://www.you.com/" target="_blank" class="card">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/You.com_logo_2021.svg/1280px-You.com_logo_2021.svg.png" alt="You.com">
-      <div>You.com AI</div>
-    </a>
-    <a href="https://www.phind.com/" target="_blank" class="card">
-      <img src="https://phind.com/static/favicon.png" alt="Phind AI">
-      <div>Phind</div>
-    </a>
+  <!-- ─── BACK BUTTON ─── -->
+  <div id="backBtn" role="button" aria-label="Back">←</div>
+
+  <!-- ─── BOOT MANAGER ─── -->
+  <div id="bootManager" class="screen active">
+    <div class="top-label">kcnx/bootmanager/command_prompt/user:</div>
+    <div class="boot-text">
+      <span style="color:#aaa;">©</span> Web Operating Systems [Version and Model : 1.011.234.32143]
+      Keddlestone Cartes Normal Xendocial ~ 2026{|.html|.js|.css|.svg|\.library}.
+      All Rights Reserved.#$QCLN%20(Guidelines included)$.
+
+      Press/Type/Enter <span class="highlight">1</span> in windows to start...
+      Press/Type/Enter <span class="highlight">0</span> in windows to shutdown...
+
+      Press/Type/Enter <span class="highlight">2</span> in Andriod to power on...
+      Press/Type/Enter <span class="highlight">3</span> in Andriod to power off...
+
+      Press/Type/Enter on the apple keyboard in ios/mac to start up...
+      Press/Type/Enter on the iphone's screen to power shut off...
+    </div>
+    <div class="input-line">
+      <span>User|kcnx|:</span>
+      <input type="text" id="bootInput" maxlength="1" autofocus spellcheck="false" autocomplete="off" />
+      <span class="cursor-blink"></span>
+    </div>
+    <div id="cancelMsg" class="cancel-msg">✗ Cancel – invalid input</div>
   </div>
 
-  <h2>🔍 Search Engines</h2>
-  <div class="section">
-    <a href="https://www.google.com/" target="_blank" class="card"><img src="https://www.google.com/favicon.ico"><div>Google</div></a>
-    <a href="https://www.bing.com/" target="_blank" class="card"><img src="https://www.bing.com/sa/simg/favicon-2x.ico"><div>Bing</div></a>
-    <a href="https://duckduckgo.com/" target="_blank" class="card"><img src="https://duckduckgo.com/favicon.ico"><div>DuckDuckGo</div></a>
-    <a href="https://search.brave.com/" target="_blank" class="card"><img src="https://search.brave.com/favicon.ico"><div>Brave</div></a>
-    <a href="https://www.yandex.com/" target="_blank" class="card"><img src="https://yandex.com/favicon.ico"><div>Yandex</div></a>
-    <a href="https://www.ecosia.org/" target="_blank" class="card"><img src="https://www.ecosia.org/favicon.ico"><div>Ecosia</div></a>
-    <a href="https://www.qwant.com/" target="_blank" class="card"><img src="https://www.qwant.com/favicon.ico"><div>Qwant</div></a>
-    <a href="https://www.startpage.com/" target="_blank" class="card"><img src="https://www.startpage.com/favicon.ico"><div>Startpage</div></a>
-    <a href="https://neeva.com/" target="_blank" class="card"><img src="https://neeva.com/favicon.ico"><div>Neeva</div></a>
-    <a href="https://search.aol.com/" target="_blank" class="card"><img src="https://www.aol.com/favicon.ico"><div>AOL</div></a>
+  <!-- ─── BOOTING SCREEN ─── -->
+  <div id="bootingScreen" class="screen">
+    <div class="loader-wrap">
+      <div class="spinner"></div>
+      <div class="boot-status" id="bootStatus">Starting System ...</div>
+    </div>
   </div>
 
-  <h2>📱 Social Media Apps</h2>
-  <div class="section">
-    <a href="https://www.facebook.com/" target="_blank" class="card"><img src="https://www.facebook.com/favicon.ico"><div>Facebook</div></a>
-    <a href="https://www.instagram.com/" target="_blank" class="card"><img src="https://www.instagram.com/favicon.ico"><div>Instagram</div></a>
-    <a href="https://www.twitter.com/" target="_blank" class="card"><img src="https://twitter.com/favicon.ico"><div>Twitter</div></a>
-    <a href="https://www.tiktok.com/" target="_blank" class="card"><img src="https://www.tiktok.com/favicon.ico"><div>TikTok</div></a>
-    <a href="https://www.linkedin.com/" target="_blank" class="card"><img src="https://www.linkedin.com/favicon.ico"><div>LinkedIn</div></a>
-    <a href="https://www.snapchat.com/" target="_blank" class="card"><img src="https://www.snapchat.com/favicon.ico"><div>Snapchat</div></a>
-    <a href="https://www.reddit.com/" target="_blank" class="card"><img src="https://www.reddit.com/favicon.ico"><div>Reddit</div></a>
-    <a href="https://www.pinterest.com/" target="_blank" class="card"><img src="https://www.pinterest.com/favicon.ico"><div>Pinterest</div></a>
-    <a href="https://discord.com/" target="_blank" class="card"><img src="https://discord.com/favicon.ico"><div>Discord</div></a>
-    <a href="https://www.threads.net/" target="_blank" class="card"><img src="https://www.threads.net/favicon.ico"><div>Threads</div></a>
+  <!-- ─── WELCOME SCREEN ─── -->
+  <div id="welcomeScreen" class="screen">
+    <video id="welcomeVideo" muted playsinline autoplay
+           src="https://res.cloudinary.com/ccmt3psw/video/upload/v1783926098/KCNX_WELCOME_INTRO_f4djcq.mp4">
+    </video>
   </div>
 
+  <!-- ─── LOCK SCREEN ─── -->
+  <div id="lockScreen" class="screen">
+    <div class="video-bg">
+      <video id="lockVideo" muted playsinline autoplay loop
+             src="https://res.cloudinary.com/ccmt3psw/video/upload/v1783926098/KCNX_LOCKSCREEN_i3_yee8es.mp4">
+      </video>
+    </div>
+    <div class="overlay" id="lockOverlay">
+      <div class="time-display" id="lockTime">--:--</div>
+      <div class="date-display" id="lockDate">---</div>
+    </div>
+    <div id="swipeCatcher"></div>
+  </div>
+
+</div>
+
+<script>
+  (function() {
+    'use strict';
+
+    // ─── DOM refs ───
+    const screens = {
+      bootManager: document.getElementById('bootManager'),
+      booting: document.getElementById('bootingScreen'),
+      welcome: document.getElementById('welcomeScreen'),
+      lock: document.getElementById('lockScreen'),
+    };
+    const backBtn = document.getElementById('backBtn');
+    const bootInput = document.getElementById('bootInput');
+    const cancelMsg = document.getElementById('cancelMsg');
+    const bootStatus = document.getElementById('bootStatus');
+    const lockTime = document.getElementById('lockTime');
+    const lockDate = document.getElementById('lockDate');
+    const welcomeVideo = document.getElementById('welcomeVideo');
+    const lockVideo = document.getElementById('lockVideo');
+    const lockOverlay = document.getElementById('lockOverlay');
+    const swipeCatcher = document.getElementById('swipeCatcher');
+
+    // ─── state ───
+    const STORAGE_KEY = 'kcnx_booted';
+    let isBooted = localStorage.getItem(STORAGE_KEY) === 'true';
+    let currentScreen = 'bootManager';
+    let statusTimer = null;
+    let clockInterval = null;
+    let lockOverlayTimer = null;
+
+    // boot status sequence
+    const statusSequence = [
+      { text: 'Starting System ...', delay: 500 },
+      { text: 'loading device preferences...', delay: 500 },
+      { text: 'checking versions', delay: 250 },
+      { text: 'checking kernel model', delay: 250 },
+      { text: 'setup-ing device', delay: 250 },
+    ];
+
+    // ─── screen management ───
+    function showScreen(id) {
+      Object.keys(screens).forEach(key => {
+        screens[key].classList.toggle('active', key === id);
+      });
+      currentScreen = id;
+      backBtn.classList.toggle('show', id !== 'bootManager');
+    }
+
+    // ─── back button ───
+    backBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      if (currentScreen === 'booting' || currentScreen === 'welcome') {
+        // go to lock
+        showScreen('lock');
+        startClock();
+        // show overlay after 2s if not already
+        showLockOverlay();
+      }
+    });
+
+    // ─── boot manager input ───
+    function handleBootInput(e) {
+      if (e.key === 'Enter') {
+        const val = bootInput.value.trim();
+        const num = parseInt(val, 10);
+        if (!isNaN(num) && num >= 0 && num <= 3) {
+          cancelMsg.classList.remove('show');
+          startBooting();
+        } else {
+          cancelMsg.textContent = '✗ Cancel – invalid input (0–3 only)';
+          cancelMsg.classList.add('show');
+          bootInput.value = '';
+          bootInput.focus();
+          setTimeout(() => {
+            cancelMsg.classList.remove('show');
+            startBooting();
+          }, 1200);
+        }
+      }
+    }
+    bootInput.addEventListener('keydown', handleBootInput);
+    setTimeout(() => bootInput.focus(), 300);
+
+    // ─── booting sequence ───
+    function startBooting() {
+      if (statusTimer) { clearTimeout(statusTimer);
+        statusTimer = null; }
+      let index = 0;
+      showScreen('booting');
+      localStorage.setItem(STORAGE_KEY, 'true');
+      isBooted = true;
+
+      function updateStatus() {
+        if (index >= statusSequence.length) {
+          bootStatus.textContent = '✓ System ready.';
+          setTimeout(() => {
+            showWelcome();
+          }, 400);
+          return;
+        }
+        const entry = statusSequence[index];
+        bootStatus.textContent = entry.text;
+        statusTimer = setTimeout(() => {
+          index++;
+          updateStatus();
+        }, entry.delay);
+      }
+      updateStatus();
+    }
+
+    // ─── welcome screen ───
+    function showWelcome() {
+      showScreen('welcome');
+      // ensure video plays once (no loop)
+      welcomeVideo.removeAttribute('loop');
+      welcomeVideo.currentTime = 0;
+      welcomeVideo.play().catch(() => {});
+      // transition to lock when video ends
+      welcomeVideo.addEventListener('ended', function onEnd() {
+        welcomeVideo.removeEventListener('ended', onEnd);
+        goToLock();
+      }, { once: true });
+      // fallback if video doesn't end
+      setTimeout(() => {
+        // if we are still on welcome, force lock
+        if (currentScreen === 'welcome') {
+          goToLock();
+        }
+      }, 12000);
+    }
+
+    function goToLock() {
+      // pause welcome video
+      welcomeVideo.pause();
+      showScreen('lock');
+      startClock();
+      // show overlay after 2 seconds
+      showLockOverlay();
+      initSwipe();
+    }
+
+    // ─── lock overlay ───
+    function showLockOverlay() {
+      if (lockOverlayTimer) clearTimeout(lockOverlayTimer);
+      // ensure overlay is hidden initially
+      lockOverlay.classList.remove('visible');
+      lockOverlayTimer = setTimeout(() => {
+        lockOverlay.classList.add('visible');
+      }, 2000);
+    }
+
+    // ─── clock ───
+    function startClock() {
+      if (clockInterval) { clearInterval(clockInterval);
+        clockInterval = null; }
+      updateClock();
+      clockInterval = setInterval(updateClock, 1000);
+    }
+
+    function updateClock() {
+      const now = new Date();
+      const h = String(now.getHours()).padStart(2, '0');
+      const m = String(now.getMinutes()).padStart(2, '0');
+      lockTime.textContent = h + ':' + m;
+      const opts = { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' };
+      lockDate.textContent = now.toLocaleDateString('en-US', opts).toUpperCase();
+    }
+
+    // ─── swipe detection ───
+    let swipeStartX = 0;
+    let swipeActive = false;
+    let mouseDown = false;
+    let mouseStartX = 0;
+
+    function initSwipe() {
+      swipeCatcher.addEventListener('touchstart', onTouchStart, { passive: true });
+      swipeCatcher.addEventListener('touchmove', onTouchMove, { passive: true });
+      swipeCatcher.addEventListener('touchend', onTouchEnd, { passive: true });
+      swipeCatcher.addEventListener('mousedown', onMouseDown, { passive: true });
+      swipeCatcher.addEventListener('mouseup', onMouseUp, { passive: true });
+      swipeCatcher.addEventListener('mousemove', onMouseMove, { passive: true });
+    }
+
+    function onTouchStart(e) {
+      const t = e.touches[0];
+      swipeStartX = t.clientX;
+      swipeActive = true;
+    }
+
+    function onTouchMove(e) {
+      if (!swipeActive) return;
+      const t = e.touches[0];
+      const dx = t.clientX - swipeStartX;
+      if (dx < -60) {
+        swipeActive = false;
+        redirectToKcnx();
+      }
+    }
+
+    function onTouchEnd() { swipeActive = false; }
+
+    function onMouseDown(e) { mouseDown = true;
+      mouseStartX = e.clientX; }
+
+    function onMouseMove(e) {
+      if (!mouseDown) return;
+      const dx = e.clientX - mouseStartX;
+      if (dx < -60) { mouseDown = false;
+        redirectToKcnx(); }
+    }
+
+    function onMouseUp() { mouseDown = false; }
+
+    function redirectToKcnx() {
+      window.location.href = 'https://kcnx.pages.dev';
+    }
+
+    // ─── fullscreen lock ───
+    function requestFullscreen() {
+      const el = document.documentElement;
+      if (el.requestFullscreen) el.requestFullscreen().catch(() => {});
+      else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+      else if (el.msRequestFullscreen) el.msRequestFullscreen();
+    }
+
+    const fsEvents = ['click', 'touchstart', 'keydown', 'mousedown'];
+    fsEvents.forEach(evt => {
+      document.addEventListener(evt, function fsHandler() {
+        requestFullscreen();
+        fsEvents.forEach(e => document.removeEventListener(e, fsHandler));
+      }, { once: true, passive: true });
+    });
+    setTimeout(requestFullscreen, 600);
+
+    // ─── initialization ───
+    function init() {
+      if (isBooted) {
+        showScreen('lock');
+        startClock();
+        showLockOverlay();
+        initSwipe();
+        // preload videos
+        welcomeVideo.load();
+        lockVideo.load();
+      } else {
+        showScreen('bootManager');
+        bootInput.focus();
+        welcomeVideo.load();
+        lockVideo.load();
+      }
+    }
+    init();
+
+    // ─── cleanup ───
+    window.addEventListener('beforeunload', () => {
+      if (statusTimer) clearTimeout(statusTimer);
+      if (clockInterval) clearInterval(clockInterval);
+      if (lockOverlayTimer) clearTimeout(lockOverlayTimer);
+    });
+
+    // ─── visibility change: keep clock ticking ───
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden && currentScreen === 'lock') {
+        updateClock();
+      }
+    });
+
+  })();
+</script>
 </body>
 </html>
